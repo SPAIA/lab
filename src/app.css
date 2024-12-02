@@ -1,10 +1,10 @@
 @import 'tailwindcss/base';
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
-@import 'flowbite';
-html,body{
-    display: block;
-    overflow: hidden;
-    width:100%;
-    height: 100%;
+html,
+body {
+	display: block;
+	overflow: hidden;
+	width: 100%;
+	height: 100%;
 }
