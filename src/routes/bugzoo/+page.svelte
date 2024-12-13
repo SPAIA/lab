@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { Card } from 'flowbite-svelte';
 
 	interface Insect {
 		id: string;
@@ -95,7 +96,7 @@
 </script>
 
 <div class="relative h-screen w-full overflow-hidden bg-gray-100">
-	<div class="absolute left-4 top-4 z-10">
+	<Card class="absolute left-4 top-4 z-10">
 		<div class="mb-4 text-xl">Insect Simulation</div>
 
 		<!-- Insects per hour -->
@@ -143,7 +144,7 @@
 		</div>
 
 		<div>Active Insects: {numInsects}</div>
-	</div>
+	</Card>
 
 	{#each insects as insect (insect.id)}
 		<div
