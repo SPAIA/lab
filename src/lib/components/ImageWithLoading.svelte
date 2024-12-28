@@ -2,19 +2,30 @@
 	export let src: string;
 	export let alt: string;
 
-	let loaded = false;
+	export let loaded = false;
 	let error = false;
+	export let naturalWidth = 0;
+	export let naturalHeight = 0;
+	let imageRef: HTMLImageElement | null = null;
 
 	function onLoad() {
 		loaded = true;
+		updateImageDimensions();
 	}
 
 	function onError() {
 		error = true;
 	}
+	function updateImageDimensions() {
+		if (imageRef) {
+			// Get the natural dimensions of the image
+			naturalWidth = imageRef.naturalWidth;
+			naturalHeight = imageRef.naturalHeight;
+		}
+	}
 </script>
 
-<div class="relative h-full w-full {$$props.class || ''} flex items-center justify-center p-4">
+<div class="h-full {$$props.class || ''} flex items-center justify-center p-4">
 	{#if !loaded}
 		<div class="absolute inset-0 flex items-center justify-center bg-gray-100">
 			<div

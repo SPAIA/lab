@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { Card } from 'flowbite-svelte';
+	import { Card, Button, Modal } from 'flowbite-svelte';
+	import { CogSolid } from 'flowbite-svelte-icons';
+	let settingModal = false;
 
 	interface Insect {
 		id: string;
@@ -96,8 +98,20 @@
 </script>
 
 <div class="relative h-screen w-full overflow-hidden bg-gray-100">
-	<Card class="absolute left-4 top-4 z-10">
-		<div class="mb-4 text-xl">Insect Simulation</div>
+	<Button
+		pill={true}
+		class="absolute right-0 m-4 !p-2"
+		color="dark"
+		outline={true}
+		size="xl"
+		on:click={() => {
+			settingModal = !settingModal;
+		}}
+	>
+		<CogSolid class="h-6 w-6" />
+	</Button>
+	<Modal bind:open={settingModal} autoclose>
+		<div class="mb-4 text-xl">Insect Simulation x</div>
 
 		<!-- Insects per hour -->
 		<div class="mb-4">
@@ -144,7 +158,7 @@
 		</div>
 
 		<div>Active Insects: {numInsects}</div>
-	</Card>
+	</Modal>
 
 	{#each insects as insect (insect.id)}
 		<div

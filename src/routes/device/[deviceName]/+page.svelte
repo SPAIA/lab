@@ -2,6 +2,7 @@
 	import { page } from '$app/stores';
 	import ImageWithLoading from '$lib/components/ImageWithLoading.svelte';
 	import type { ApiResponse, SPAIAEvent } from '$lib/types';
+	import { Button } from 'flowbite-svelte';
 	import { onMount } from 'svelte';
 	let events: SPAIAEvent[] = [];
 	let limit = 15;
@@ -60,17 +61,30 @@
 {#if events.length}
 	<div class="flex h-full w-full flex-col p-4">
 		<!-- Main Image Viewer -->
-		<div class="relative flex-grow overflow-hidden rounded-lg bg-gray-100">
-			regions: {events[selectedIndex].regions.length} time: {events[selectedIndex].time} ID: {events[
-				selectedIndex
-			].id}
-			<ImageWithLoading src={imgSrc} alt="Selected event" class="h-full w-full object-contain" />
-			<button class="absolute right-5 top-5 h-8 w-8 rounded-full bg-lime-400" on:click={nextPage}>
+		<div class="flex h-full flex-grow-0 overflow-hidden bg-gray-100">
+			<div class="flex max-h-full flex-col overflow-hidden">
+				<ImageWithLoading
+					src={imgSrc}
+					alt="Selected event"
+					class="max-h-[calc(100%-2.5rem)] flex-grow object-contain"
+				/>
+				<div class="flex h-10 w-full items-center justify-center space-x-2 p-2">
+					<span>Is there a bug in this image?</span>
+					<button>Yes</button>
+					<button>No</button>
+				</div>
+			</div>
+			<div class="h-full w-1/6">
+				regions: {events[selectedIndex].regions.length} time: {events[selectedIndex].time} ID: {events[
+					selectedIndex
+				].id}
+			</div>
+			<!-- <button class="absolute right-5 top-5 h-8 w-8 rounded-full bg-lime-400" on:click={nextPage}>
 				+
-			</button>
-			{#each events[selectedIndex].regions as bbox}
-				<div class="w-8">[]</div>
-			{/each}
+			</button> -->
+			<!-- {#each events[selectedIndex].regions as bbox}
+				<div class="absolute left-0 top-0 h-8 w-8 border-red-600">[]</div>
+			{/each} -->
 		</div>
 
 		<!-- Film Strip with Navigation -->
@@ -111,12 +125,20 @@
 			</div>
 
 			<!-- Right Scroll Button -->
-			<button
-				on:click={() => scrollFilmStrip(1)}
-				class="h-32 w-12 shrink-0 rounded bg-gray-100 hover:bg-gray-200"
-			>
-				&gt;
-			</button>
+			<div class="flex flex-col space-y-1">
+				<button
+					on:click={() => scrollFilmStrip(1)}
+					class=" h-24 w-12 shrink-0 rounded bg-gray-100 hover:bg-gray-200"
+				>
+					&gt;
+				</button>
+				<button
+					class=" h-8 w-12 shrink-0 rounded bg-gray-100 hover:bg-gray-200"
+					on:click={nextPage}
+				>
+					>>
+				</button>
+			</div>
 		</div>
 	</div>
 {/if}
