@@ -17,7 +17,7 @@ export const GET: RequestHandler = async ({ url, locals: { supabase } }) => {
 
     if (error) {
         console.error('Auth callback error:', error_description);
-        throw redirect(303, `/login?error=${encodeURIComponent(error_description)}`);
+        throw redirect(303, `/login?error=${encodeURIComponent(error_description ?? '')}`);
     }
 
     if (code) {

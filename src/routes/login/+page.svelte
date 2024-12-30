@@ -35,7 +35,7 @@
 		if (!supabase) return;
 		try {
 			loading = true;
-            console.log("yo", supabase)
+            console.log("yo", ${window.location.origin})
 			const { error } = await supabase.auth.signUp({
 				email:email,
 				password:password,
