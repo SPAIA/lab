@@ -4,10 +4,9 @@
 	import { onMount } from 'svelte';
 	import '../app.css';
 	import type { LayoutData } from './$types';
-	let { children } = $props();
-	export let data: LayoutData;
+	let { children, data } = $props<{data: LayoutData}>();
 
-	$: ({ supabase, session } = data);
+	const { supabase, session } = $derived(data);
 
 	onMount(() => {
 		if (!supabase) return;
