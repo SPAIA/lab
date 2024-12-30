@@ -1,5 +1,7 @@
 <script lang="ts">
+	import { invalidate } from '$app/navigation';
 	import Header from '$lib/components/header.svelte';
+	import { onMount } from 'svelte';
 	import '../app.css';
 	import type { LayoutData } from './$types';
 	let { children } = $props();
