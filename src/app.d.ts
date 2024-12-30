@@ -4,7 +4,12 @@ declare global {
 	namespace App {
 		interface Locals {
 			supabase: SupabaseClient
-			getSession(): Promise<Session | null>
+			safeGetSession(): Promise<Session | null>
+			user: User | null
+			session: Session | null
+		}
+		interface PageData {
+			session: Session | null
 		}
 		// interface Error {}
 		// interface Locals {}
@@ -12,6 +17,10 @@ declare global {
 		// interface PageState {}
 		// interface Platform {}
 	}
+}
+declare module '$env/static/public' {
+	export const PUBLIC_SUPABASE_URL: string;
+	export const PUBLIC_SUPABASE_ANON_KEY: string;
 }
 
 export { };

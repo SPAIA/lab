@@ -8,18 +8,28 @@
 
 	const { supabase, session } = $derived(data);
 
-	onMount(() => {
-		if (!supabase) return;
-		const {
-			data: { subscription }
-		} = supabase.auth.onAuthStateChange((event, _session) => {
-			if (_session?.expires_at !== session?.expires_at) {
-				invalidate('supabase:auth');
-			}
-		});
+  onMount(() => {
+    const { data } = supabase.auth.onAuthStateChange((_, newSession) => {
+      if (newSession?.expires_at !== session?.expires_at) {
+        invalidate('supabase:auth')
+      }
+    })
 
-		return () => subscription.unsubscribe();
-	});
+    return () => data.subscription.unsubscribe()
+  })
+
+	// onMount(() => {
+	// 	if (!supabase) return;
+	// 	const {
+	// 		data: { subscription }
+	// 	} = supabase.auth.onAuthStateChange((event, _session) => {
+	// 		if (_session?.expires_at !== session?.expires_at) {
+	// 			invalidate('supabase:auth');
+	// 		}
+	// 	});
+
+	// 	return () => subscription.unsubscribe();
+	// });
 </script>
 
 <div class="flex h-svh w-full max-w-full flex-col items-center bg-cover">

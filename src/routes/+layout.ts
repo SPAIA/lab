@@ -1,36 +1,47 @@
-import { createSupabaseLoadClient } from '@supabase/auth-helpers-sveltekit';
+
+
+
+
+import { createBrowserClient, createServerClient, isBrowser } from '@supabase/ssr'
+import { PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_URL } from '$env/static/public'
 import type { Load } from '@sveltejs/kit';
-import { user as userStore } from '$lib/stores/userStore';
-import { supabaseStore } from '$lib/stores/supabaseStore';
 
-const PUBLIC_SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const PUBLIC_SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+export const load: Load = async ({ data, depends, fetch }) => {
+    /**
+     * Declare a dependency so the layout can be invalidated, for example, on
+     * session refresh.
+     */
+    depends('supabase:auth')
 
+    const supabase = isBrowser()
+        ? createBrowserClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
+            global: {
+                fetch,
+            },
+        })
+        : createServerClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
+            global: {
+                fetch,
+            },
+            cookies: {
+                getAll() {
+                    return data?.cookies
+                },
+            },
+        })
 
-
-export const load: Load = async ({ fetch, data, depends }) => {
-    depends('supabase:auth');
-    if (!data) return
-    const supabase = createSupabaseLoadClient({
-        supabaseUrl: PUBLIC_SUPABASE_URL,
-        supabaseKey: PUBLIC_SUPABASE_ANON_KEY,
-        event: { fetch },
-        serverSession: data.session,
-    });
-    supabase.auth.onAuthStateChange((event, session) => {
-
-        if (event === 'SIGNED_OUT') {
-            userStore.set(null);
-        } else if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
-            userStore.set(session?.user || null);
-        }
-    });
-    supabaseStore.set(supabase);
-    // Initial session check
+    /**
+     * It's fine to use `getSession` here, because on the client, `getSession` is
+     * safe, and on the server, it reads `session` from the `LayoutData`, which
+     * safely checked the session using `safeGetSession`.
+     */
     const {
         data: { session },
-    } = await supabase.auth.getSession();
+    } = await supabase.auth.getSession()
 
-    userStore.set(session?.user || null);
-    return { supabase, session };
-};
+    const {
+        data: { user },
+    } = await supabase.auth.getUser()
+
+    return { session, supabase, user }
+}

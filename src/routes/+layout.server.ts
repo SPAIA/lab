@@ -1,7 +1,7 @@
 import type { ServerLoad } from '@sveltejs/kit';
 
-export const load: ServerLoad = async ({ locals: { getSession } }) => {
+export const load: ServerLoad = async ({ locals: { safeGetSession } }) => {
     return {
-        session: await getSession(),
+        session: await safeGetSession(),
     };
 };

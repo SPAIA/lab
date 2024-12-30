@@ -40,7 +40,7 @@
 				email:email,
 				password:password,
                 options: {
-					emailRedirectTo: `${window.location.origin}/auth/callback/`,
+					emailRedirectTo: `${window.location.origin}/auth/confirm`,
                     data: {
                         email_confirm: true
                     }
