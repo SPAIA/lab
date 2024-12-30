@@ -1,14 +1,15 @@
 <script lang="ts">
+    import { supabaseStore } from '$lib/stores/supabaseStore';
 	import { Button, Label, Input, Card } from 'flowbite-svelte';
 	import { goto } from '$app/navigation';
 
 	let email = '';
 	let password = '';
-	export let data;
 	let loading = false;
-	const { supabase } = data;
+	const supabase = $derived($supabaseStore);
 
 	async function handleSignIn() {
+        console.log("yo", supabase)
 		if (!supabase) return;
 		try {
 			loading = true;
@@ -34,9 +35,16 @@
 		if (!supabase) return;
 		try {
 			loading = true;
+            console.log("yo", supabase)
 			const { error } = await supabase.auth.signUp({
-				email,
-				password
+				email:email,
+				password:password,
+                options: {
+					emailRedirectTo: `${window.location.origin}/auth/callback/`,
+                    data: {
+                        email_confirm: true
+                    }
+				}
 			});
 			if (error) throw error;
 			alert('Check your email for the confirmation link!');

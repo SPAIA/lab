@@ -18,6 +18,7 @@ export const load: Load = async ({ fetch, data, depends }) => {
         serverSession: data.session,
     });
     supabase.auth.onAuthStateChange((event, session) => {
+
         if (event === 'SIGNED_OUT') {
             userStore.set(null);
         } else if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
