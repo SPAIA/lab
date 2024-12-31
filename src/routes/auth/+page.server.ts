@@ -4,12 +4,12 @@ import type { Actions, RequestEvent } from './$types'
 
 export const actions: Actions = {
     signup: async ({ request, locals: { supabase }, url }: RequestEvent) => {
+        console.log('tick')
         const origin = url.origin;
         const formData = await request.formData()
         const email = formData.get('email') as string
         const password = formData.get('password') as string
-        console.log("oooooo", origin)
-        console.log("oossoooo", formData)
+
         const { error } = await supabase.auth.signUp({
             email, password, options: {
                 emailRedirectTo: `${origin}/auth/confirm`,
@@ -26,6 +26,7 @@ export const actions: Actions = {
         }
     },
     login: async ({ request, locals: { supabase } }: RequestEvent) => {
+        console.log('tock')
         const formData = await request.formData()
         const email = formData.get('email') as string
         const password = formData.get('password') as string

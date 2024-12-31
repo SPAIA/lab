@@ -66,7 +66,6 @@
 					</svg>
 					Sign in with Google
 				</Button>
-				<button formaction="?/signup">Sign up</button>
 
 				<Button color="alternative" class="w-full" formaction="?/signup" type="submit"
 					>Create an account</Button

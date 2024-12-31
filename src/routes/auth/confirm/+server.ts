@@ -19,10 +19,13 @@ export const GET: RequestHandler = async ({ url, locals: { supabase } }) => {
     redirectTo.searchParams.delete('type')
 
     if (token_hash && type) {
+        console.log("token_hash", token_hash)
         const { error } = await supabase.auth.verifyOtp({ type, token_hash })
         if (!error) {
             redirectTo.searchParams.delete('next')
             redirect(303, redirectTo)
+        } else {
+            console.log("errorxx", error)
         }
     }
 
