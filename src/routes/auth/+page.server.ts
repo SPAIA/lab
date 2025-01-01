@@ -12,17 +12,14 @@ export const actions: Actions = {
 
         const { error } = await supabase.auth.signUp({
             email, password, options: {
-                emailRedirectTo: `${origin}/auth/confirm`,
-                data: {
-                    email_confirm: true
-                }
+                emailRedirectTo: `${origin}/auth/confirm`
             }
         })
         if (error) {
             console.error(error)
             redirect(303, '/auth/error')
         } else {
-            redirect(303, '/')
+            redirect(303, '/my/lab')
         }
     },
     login: async ({ request, locals: { supabase } }: RequestEvent) => {
@@ -36,7 +33,7 @@ export const actions: Actions = {
             console.error(error)
             redirect(303, '/auth/error')
         } else {
-            redirect(303, '/private')
+            redirect(303, '/my/lab')
         }
     },
 }

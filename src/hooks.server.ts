@@ -67,15 +67,41 @@ const authGuard: Handle = async ({ event, resolve }) => {
     event.locals.session = session
     event.locals.user = user
 
-    if (!event.locals.session && event.url.pathname.startsWith('/private')) {
+    if (!event.locals.session && event.url.pathname.startsWith('/my')) {
         redirect(303, '/auth')
     }
 
     if (event.locals.session && event.url.pathname === '/auth') {
-        redirect(303, '/private')
+        redirect(303, '/my/lab')
+    }
+
+    return resolve(event)
+}
+const attachApiTokenHandle: Handle = async ({ event, resolve }) => {
+    // we need the Supabase access token
+    const { session } = await event.locals.safeGetSession()
+
+    if (session) {
+        // store original fetch
+        const originalFetch = event.fetch
+
+        // override fetch
+        event.fetch = async (info, init = {}) => {
+            const url = typeof info === 'string' ? info : info.url
+
+            // if it’s hitting our API, attach the Bearer token
+            if (url.includes('api.spaia.earth')) {
+                init.headers = {
+                    ...init.headers,
+                    Authorization: `Bearer ${session.access_token}`
+                }
+            }
+
+            return originalFetch(info, init)
+        }
     }
 
     return resolve(event)
 }
 
-export const handle: Handle = sequence(supabase, authGuard)
+export const handle: Handle = sequence(supabase, authGuard, attachApiTokenHandle)

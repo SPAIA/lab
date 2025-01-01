@@ -37,7 +37,7 @@
 			</Button>
 
 			<div class="space-y-3">
-				<Button color="alternative" class="w-full">
+				<!-- <Button color="alternative" class="w-full">
 					<svg
 						class="mr-2 h-4 w-4"
 						viewBox="0 0 21 20"
@@ -65,7 +65,7 @@
 						>
 					</svg>
 					Sign in with Google
-				</Button>
+				</Button> -->
 
 				<Button color="alternative" class="w-full" formaction="?/signup" type="submit"
 					>Create an account</Button
