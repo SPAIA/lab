@@ -84,3 +84,10 @@ export interface ApiResponse<T> {
 	};
 	error?: string;
 }
+
+export interface DeviceSettings {
+	uploadFrequency: string;
+	wifiPassword?: String;
+	ssid?: String;
+	sensors?: string[]
+}
