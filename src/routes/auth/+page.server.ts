@@ -1,6 +1,7 @@
 import { redirect } from '@sveltejs/kit'
 
 import type { Actions, RequestEvent } from './$types'
+import { setError } from '$lib/stores/errorStore';
 
 export const actions: Actions = {
     signup: async ({ request, locals: { supabase }, url }: RequestEvent) => {
@@ -30,10 +31,17 @@ export const actions: Actions = {
 
         const { error } = await supabase.auth.signInWithPassword({ email, password })
         if (error) {
-            console.error(error)
-            redirect(303, '/auth/error')
+            console.log("returned error")
+            return {
+                success: false,
+                error: error.message
+            }
         } else {
-            redirect(303, '/my/lab')
+
+            return {
+                success: true
+            }
         }
+        throw redirect(303, '/my/lab')
     },
 }

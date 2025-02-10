@@ -1,19 +1,26 @@
 <script lang="ts">
+	import { clearError, setError } from '$lib/stores/errorStore';
+	import { addLoadTask, removeLoadTask } from '$lib/stores/loadStore';
 	import { Button, Card, Input, Label } from 'flowbite-svelte';
-	let loading = false;
-</script>
+	import { enhance } from '$app/forms';
+	import { onMount } from 'svelte';
+	export let form;
 
-<!-- <form method="POST" action="?/login"> -->
-<!-- <label>
-		Email
-		<input name="email" type="email" />
-	</label>
-	<label>
-		Password
-		<input name="password" type="password" />
-	</label>
-	<button>Login</button>
-	<button formaction="?/signup">Sign up</button> -->
+	onMount(() => {
+		clearError();
+	});
+	function handleSubmit() {
+		console.log('yo');
+		addLoadTask('Logging in...');
+		return async ({ result }) => {
+			console.log('result', result.data);
+			if (result?.data?.error) {
+				setError(result.data.error);
+			}
+			removeLoadTask('logging in...');
+		};
+	}
+</script>
 
 <div class="flex min-h-screen w-full items-center justify-center">
 	<Card class="w-full max-w-md space-y-6 p-6">
@@ -21,7 +28,7 @@
 			Sign in to your account
 		</h3>
 
-		<form method="POST" action="?/login" class="space-y-4">
+		<form method="POST" action="?/login" use:enhance={handleSubmit} class="space-y-4">
 			<div>
 				<Label for="email" class="mb-2">Email</Label>
 				<Input name="email" type="email" id="email" placeholder="name@company.com" required />
@@ -31,10 +38,11 @@
 				<Label for="password" class="mb-2">Password</Label>
 				<Input type="password" name="password" id="password" placeholder="••••••••" required />
 			</div>
+			<div class="text-sm font-medium text-primary-600 hover:underline dark:text-primary-500">
+				<a href="/auth/reset-password">Forgot password?</a>
+			</div>
 
-			<Button type="submit" class="w-full" disabled={loading}>
-				{loading ? 'Loading...' : 'Sign in to your account'}
-			</Button>
+			<Button type="submit" class="w-full">Sign in to your account</Button>
 
 			<div class="space-y-3">
 				<!-- <Button color="alternative" class="w-full">
