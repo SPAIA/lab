@@ -8,18 +8,12 @@
 </script>
 
 <StepCard step={2}>
-	<h2 class="mb-6 text-lg font-bold">
-		How often should the device try and upload data to the database?
-	</h2>
+	<h2 class="mb-6 text-lg font-bold">Give your device a name</h2>
+
+	<Input id="deviceName" size="lg" placeholder="Name" bind:value={settings.deviceName} />
 	<p class="mb-4 text-xs italic">
-		*The longer the period between uploads, the less battery power is used.
+		*Please choose a name as unique as you are. No spaces or special charachters.
 	</p>
-	<div class="mb-4">
-		{#each frequencyOptions as option}
-			<Radio name="uploadFrequency" bind:group={settings.uploadFrequency} value={option}
-				>{option}</Radio
-			>
-		{/each}
-	</div>
-	<Button on:click={nextPage} disabled={!settings.uploadFrequency}>Next</Button>
+	<div class="mb-4"></div>
+	<Button on:click={nextPage} disabled={!settings.deviceName}>Next</Button>
 </StepCard>

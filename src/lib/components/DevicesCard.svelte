@@ -17,7 +17,7 @@
 	{#if devices.length}
 		<div class="space-y-4 p-4">
 			{#if devices.length}
-				<h2 class="text-lg font">Devices</h2>
+				<h2 class="font text-lg">Devices</h2>
 				<Table>
 					<TableHead>
 						<TableHeadCell>Device name</TableHeadCell>

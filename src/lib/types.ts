@@ -87,7 +87,8 @@ export interface ApiResponse<T> {
 
 export interface DeviceSettings {
 	uploadFrequency: string;
-	wifiPassword?: String;
-	ssid?: String;
+	wifiPassword?: string;
+	ssid?: string;
 	sensors?: string[]
+	deviceName?: string;
 }

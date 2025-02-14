@@ -62,16 +62,35 @@
 	<div class="flex h-full w-full flex-col p-4">
 		<!-- Main Image Viewer -->
 		<div class="flex h-full flex-grow-0 overflow-hidden bg-gray-100">
-			<div class="flex max-h-full flex-col overflow-hidden">
+			<div class="overflow-hidde relative flex max-h-full flex-col">
 				<ImageWithLoading
 					src={imgSrc}
 					alt="Selected event"
-					class="max-h-[calc(100%-2.5rem)] flex-grow object-contain"
+					class="h-auto max-h-[calc(100%-2.5rem)] flex-grow object-contain"
 				/>
-				<div class="flex h-10 w-full items-center justify-center space-x-2 p-2">
-					<span>Is there a bug in this image?</span>
-					<button>Yes</button>
-					<button>No</button>
+
+				<!-- Image -->
+
+				<!-- Floating Action Area -->
+				<div
+					class="absolute bottom-0 left-1/2 flex -translate-x-1/2 transform items-center justify-center space-x-2 rounded-full bg-white p-1 px-4 shadow-lg"
+				>
+					<div class="m-2 flex w-full flex-col">
+						<div class="w-full">
+							<span class=" min-w-64 text-center text-gray-700">Is there a bug in this image?</span>
+						</div>
+						<div class="flex w-full justify-around">
+							<button
+								class="rounded-full bg-red-500 px-4 py-2 text-white transition duration-200 hover:bg-red-600"
+								>No</button
+							>
+
+							<button
+								class="rounded-full bg-blue-500 px-4 py-2 text-white transition duration-200 hover:bg-blue-600"
+								>Yes</button
+							>
+						</div>
+					</div>
 				</div>
 			</div>
 			<div class="h-full w-1/6">

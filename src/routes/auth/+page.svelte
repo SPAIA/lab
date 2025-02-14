@@ -4,20 +4,31 @@
 	import { Button, Card, Input, Label } from 'flowbite-svelte';
 	import { enhance } from '$app/forms';
 	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
+	import { setInfo } from '$lib/stores/infoStore.js';
 	export let form;
 
 	onMount(() => {
 		clearError();
 	});
 	function handleSubmit() {
-		console.log('yo');
 		addLoadTask('Logging in...');
-		return async ({ result }) => {
-			console.log('result', result.data);
+		return async ({ result }: any) => {
+			removeLoadTask('logging in...');
+
+			console.log('result', result);
 			if (result?.data?.error) {
 				setError(result.data.error);
+			} else if (result.success) {
+				goto('/my/lab');
+			} else if (result.type == 'redirect') {
+				console.log('info');
+				setInfo('Please check your inbox to confirm your email address');
+			} else {
+				console.log(result);
+				console.log(result.success);
+				setError('An unexpected error occured');
 			}
-			removeLoadTask('logging in...');
 		};
 	}
 </script>

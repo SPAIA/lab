@@ -4,9 +4,10 @@
 	import Step2 from './Step2.svelte';
 	import Step3 from './Step3.svelte';
 	import Step4 from './Step4.svelte';
+	import Step5 from './Step5.svelte';
 	let settings: DeviceSettings = { uploadFrequency: 'daily' };
 	let currentStep = 1;
-	const steps = [Step1, Step2, Step3, Step4];
+	const steps = [Step1, Step2, Step3, Step4, Step5];
 	const nextPage = () => {
 		if (currentStep < steps.length) {
 			currentStep += 1;
