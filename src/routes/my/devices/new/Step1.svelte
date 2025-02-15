@@ -6,9 +6,8 @@
 
 <StepCard>
 	<div class="h-full w-full scroll-auto">
-		<p class="bb-4">Please complete these steps using the latest version opf google chrome.</p>
+		<p class="bb-4">Please complete these steps using the latest version of google chrome.</p>
 		<ul>
-			<li>Prepare your device by takiing off the upper shell.</li>
 			<li>
 				Format your SD card. <a href="https://www.youtube.com/watch?v=OY28ANg_4hM" target="_blank"
 					>here's a video</a

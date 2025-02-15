@@ -2,9 +2,13 @@
 	import { goto } from '$app/navigation';
 	import StepCard from '$lib/components/StepCard.svelte';
 	import { setInfo } from '$lib/stores/infoStore';
-	import { Button, Card } from 'flowbite-svelte';
+	import { Button, Card, Spinner } from 'flowbite-svelte';
 	export let nextPage: () => void;
+
+	let isLoading = false;
+
 	const delay = () => {
+		isLoading = true;
 		setTimeout(() => {
 			nextPage();
 			setInfo('Congratulations your device has been registered!');
@@ -14,7 +18,13 @@
 </script>
 
 <StepCard step={4}>
-	<h2>Plug you device in to your computer</h2>
+	<h2>Plug your device into your computer</h2>
 
-	<Button on:click={delay}>Flash the firmware!</Button>
+	<Button on:click={delay} disabled={isLoading}>
+		{#if isLoading}
+			<Spinner class="mr-2" /> Flashing...
+		{:else}
+			Flash the firmware!
+		{/if}
+	</Button>
 </StepCard>
