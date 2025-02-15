@@ -5,6 +5,8 @@
 import { createBrowserClient, createServerClient, isBrowser } from '@supabase/ssr'
 import { PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_URL } from '$env/static/public'
 import type { Load } from '@sveltejs/kit';
+import { browser } from '$app/environment';
+import { goto } from '$app/navigation';
 
 export const load: Load = async ({ data, depends, fetch }) => {
     /**
@@ -43,5 +45,8 @@ export const load: Load = async ({ data, depends, fetch }) => {
         data: { user },
     } = await supabase.auth.getUser()
 
+    if (browser && session) {
+        goto('/my/lab');
+    }
     return { session, supabase, user }
 }

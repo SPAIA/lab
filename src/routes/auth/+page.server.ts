@@ -17,9 +17,9 @@ export const actions: Actions = {
             }
         })
         if (error) {
-            redirect(303, '/auth/error')
+            return ({ error: "Please check your inbox to confirm your email address" })
         } else {
-            redirect(303, '/my/lab')
+            return ({ info: "Please check your inbox to confirm your email address" })
         }
     },
     login: async ({ request, locals: { supabase } }: RequestEvent) => {

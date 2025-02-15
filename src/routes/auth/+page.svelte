@@ -22,8 +22,11 @@
 			} else if (result.success) {
 				goto('/my/lab');
 			} else if (result.type == 'redirect') {
-				console.log('info');
-				setInfo('Please check your inbox to confirm your email address');
+				if (result.location) {
+					goto(result.location);
+				}
+			} else if (result.data.info) {
+				setInfo(result.data.info);
 			} else {
 				console.log(result);
 				console.log(result.success);
