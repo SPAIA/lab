@@ -91,4 +91,5 @@ export interface DeviceSettings {
 	ssid?: string;
 	sensors?: string[]
 	deviceName?: string;
+	serial?: string;
 }

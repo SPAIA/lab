@@ -14,7 +14,7 @@
 </script>
 
 <div class="flex min-h-screen w-full">
-	<div class="w-full p-20">
+	<div class="w-full overflow-scroll p-20">
 		<div class="space-y-4">
 			<!-- {pagination?.totalCount}
 			{$totalDevices} ---
