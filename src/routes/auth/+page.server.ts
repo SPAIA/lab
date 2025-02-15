@@ -17,7 +17,8 @@ export const actions: Actions = {
             }
         })
         if (error) {
-            return ({ error: "Please check your inbox to confirm your email address" })
+            console.log(error)
+            return ({ error: error })
         } else {
             return ({ info: "Please check your inbox to confirm your email address" })
         }
