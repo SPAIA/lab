@@ -30,6 +30,7 @@
 							<div
 								class="flex w-full max-w-xs flex-col items-center rounded-lg border border-gray-200 bg-white p-6 shadow-md transition-shadow duration-200 hover:border-blue-200 hover:shadow-lg"
 							>
+								<img src="/images/spaia.png" class="" alt="SPAIA" />
 								<h2
 									class="group-hover:text-primary0 mb-2 text-xl font-semibold text-gray-800 transition-colors"
 								>
