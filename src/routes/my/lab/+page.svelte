@@ -20,13 +20,13 @@
 			{$totalDevices} ---
 			{$totalDevices > 4 ? 4 : $totalDevices} -->
 			<div
-				class={`grid w-full gap-2 p-2 md:grid-cols-${
-					$totalDevices > 4 ? 4 : $totalDevices
+				class={`grid w-full gap-2 p-2 grid-cols-${
+					$totalDevices > 4 ? 4 : $totalDevices + 1
 				} 2xl:grid-cols-${$totalDevices > 6 ? 4 : $totalDevices}`}
 			>
 				{#if devices.length}
 					{#each devices as device}
-						<a href={`/device/${device.name}`} class="group block no-underline">
+						<a href={`/device/${device.name}`} class="block grid-flow-col-dense no-underline">
 							<div
 								class="flex w-full max-w-xs flex-col items-center rounded-lg border border-gray-200 bg-white p-6 shadow-md transition-shadow duration-200 hover:border-blue-200 hover:shadow-lg"
 							>
@@ -67,7 +67,7 @@
 				{:else}
 					<p>No devices found.</p>
 				{/if}
-				<Card class="flex w-full flex-col items-center p-4">
+				<Card class="flex w-full flex-col items-center justify-center p-4">
 					<h2 class="font text-lg">Add new device</h2>
 					<Button href="/my/devices/new">Add device</Button>
 				</Card>
