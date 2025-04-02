@@ -39,7 +39,10 @@ export const actions: Actions = {
             }
 
             // Wrap it in a data property for SvelteKit
-            return { data: responseJson };
+            return new Response(responseJson, {
+                status: 200
+            });
+
         } catch (error) {
             console.error("Fetch error:", error);
             return { error: "Network error occurred while creating device" };

@@ -1,6 +1,7 @@
 <script>
 	import FormattedDate from '$lib/components/FormattedDate.svelte';
 	import { Button, Card } from 'flowbite-svelte';
+	import { IconOutline } from 'flowbite-svelte-icons';
 	import { writable } from 'svelte/store';
 	let { data } = $props();
 	let { user } = $derived(data);
