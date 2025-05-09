@@ -4,7 +4,6 @@ import type { PageServerLoad } from './$types'
 export const load: PageServerLoad = async ({ locals: { supabase } }) => {
     const { data: { user } } = await supabase.auth.getUser()
     let session = await supabase.auth.getSession()
-    console.log(session.data.session.access_token)
     const response = await fetch(
         `https://beta.api.spaia.earth/my/devices`,
         {

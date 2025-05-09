@@ -45,8 +45,6 @@ export const load: Load = async ({ data, depends, fetch }) => {
         data: { user },
     } = await supabase.auth.getUser()
 
-    if (browser && session) {
-        goto('/my/lab');
-    }
+
     return { session, supabase, user }
 }

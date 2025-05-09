@@ -1,69 +1,60 @@
-<script>
-	import FormattedDate from '$lib/components/FormattedDate.svelte';
-	import { Button, Card } from 'flowbite-svelte';
-	import { IconOutline } from 'flowbite-svelte-icons';
+<script lang="ts">
+	import DevicesCard from '$lib/components/DevicesCard.svelte';
+	import type { Device } from '$lib/types';
+	import { Button, Card, Modal } from 'flowbite-svelte';
 	import { writable } from 'svelte/store';
-	let { data } = $props();
-	let { user } = $derived(data);
-	let { devices } = $derived(data);
-	let { pagination } = $derived(data);
-	let totalDevices = writable(1);
-	$effect(() => {
-		console.log('pagination', pagination);
-		totalDevices.set(pagination?.totalCount ?? 2);
-	});
+
+	// Create a proper store since DevicesCard expects a store (uses $activeDeviceId)
+	const activeDeviceCard = writable(-1);
+	let showDeleteModal = writable(false);
+	let deviceToDelete: Device | null = null;
+	interface Props {
+		data: {
+			user: any;
+			devices: any[];
+			pagination?: { totalCount: number };
+		};
+	}
+
+	// Use Svelte 5 runes for props
+	let { data } = $props() as Props;
+
+	// Use derived values with the $derived rune
+	let { devices, pagination, user } = $derived(data);
+	let totalDevices = $derived(pagination?.totalCount ?? 2);
+
+	// Compute grid column classes reactively
+	let mainGridCols = $derived(`grid-cols-${totalDevices > 4 ? 4 : totalDevices + 1}`);
+	let xlGridCols = $derived(`2xl:grid-cols-${totalDevices > 6 ? 4 : totalDevices}`);
+
+	// Debug with $inspect
+	$inspect({ pagination, totalDevices });
+	const deleteDevice = (device: Device) => {
+		alert('tell me why');
+		showDeleteModal.set(true);
+		deviceToDelete = device;
+	};
+	const confirmDelete = () => {
+		alert('delete');
+		showDeleteModal.set(false);
+	};
 </script>
 
 <div class="flex min-h-screen w-full">
 	<div class="w-full overflow-scroll p-20">
 		<div class="space-y-4">
-			<!-- {pagination?.totalCount}
-			{$totalDevices} ---
-			{$totalDevices > 4 ? 4 : $totalDevices} -->
-			<div
-				class={`grid w-full gap-2 p-2 grid-cols-${
-					$totalDevices > 4 ? 4 : $totalDevices + 1
-				} 2xl:grid-cols-${$totalDevices > 6 ? 4 : $totalDevices}`}
-			>
+			{showDeleteModal}
+			<div class={`grid w-full gap-2 p-2 ${mainGridCols} ${xlGridCols}`}>
 				{#if devices.length}
 					{#each devices as device}
-						<a href={`/device/${device.name}`} class="block grid-flow-col-dense no-underline">
-							<div
-								class="flex w-full max-w-xs flex-col items-center rounded-lg border border-gray-200 bg-white p-6 shadow-md transition-shadow duration-200 hover:border-blue-200 hover:shadow-lg"
-							>
-								<img src="/images/spaia.png" class="" alt="SPAIA" />
-								<h2
-									class="group-hover:text-primary0 mb-2 text-xl font-semibold text-gray-800 transition-colors"
-								>
-									{device.name}
-								</h2>
-
-								{#if device.lastSeen}
-									<div class="mt-auto flex items-center gap-2 text-sm text-gray-500">
-										<svg
-											xmlns="http://www.w3.org/2000/svg"
-											class="h-4 w-4"
-											fill="none"
-											viewBox="0 0 24 24"
-											stroke="currentColor"
-										>
-											<path
-												stroke-linecap="round"
-												stroke-linejoin="round"
-												stroke-width="2"
-												d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-											/>
-										</svg>
-										<span>Last seen:</span>
-										<time class="font-mono text-xs"
-											><FormattedDate date={device.lastSeen}></FormattedDate></time
-										>
-									</div>
-								{:else}
-									<div class="font-mono text-xs">Waiting for connection.</div>
-								{/if}
-							</div>
-						</a>
+						<DevicesCard
+							{device}
+							{deleteDevice}
+							activeDeviceId={$activeDeviceCard}
+							closeAllMenus={() => {
+								activeDeviceCard.set(device.id);
+							}}
+						/>
 					{/each}
 				{:else}
 					<p>No devices found.</p>
@@ -76,3 +67,12 @@
 		</div>
 	</div>
 </div>
+
+<Modal title="Confirm Delete" bind:open={$showDeleteModal} autoclose>
+	<p class="mb-4">Are you sure you want to delete {deviceToDelete?.name}?</p>
+
+	<div class="flex justify-end gap-4">
+		<Button on:click={() => showDeleteModal.set(false)}>Cancel</Button>
+		<Button color="red" on:click={confirmDelete}>Delete Permanently</Button>
+	</div>
+</Modal>

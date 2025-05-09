@@ -87,7 +87,7 @@ const attachApiTokenHandle: Handle = async ({ event, resolve }) => {
 
         // override fetch
         event.fetch = async (info, init = {}) => {
-            const url = typeof info === 'string' ? info : info.url
+            const url = (info instanceof Request ? info.url : info).toString()
 
             // if it’s hitting our API, attach the Bearer token
             if (url.includes('api.spaia.earth')) {
