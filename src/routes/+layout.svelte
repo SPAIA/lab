@@ -37,7 +37,7 @@
 
 <div class="flex h-svh w-full max-w-full flex-col items-center bg-cover">
 	<Header {logout} />
-	<main class="flex w-full max-w-full flex-grow overflow-hidden">
+	<main class="flex w-full w-full max-w-full flex-grow overflow-hidden">
 		{@render children()}
 	</main>
 	<LoadingScreen />

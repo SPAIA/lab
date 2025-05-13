@@ -25,7 +25,8 @@
 		</div>
 		<NavUl class="order-1">
 			<NavLi href="/my/lab" activeClass="font-bold">Home</NavLi>
-			<NavLi href="/bugzoo">Simulator</NavLi>
+			<NavLi href="/bugzoo">Bug Zoo</NavLi>
+			<NavLi href="/emulator">Emulator</NavLi>
 			<!-- <NavLi href="/docs/components/navbar">Navbar</NavLi>
 			<NavLi href="/pricing">Pricing</NavLi>
 			<NavLi href="/contact">Contact</NavLi> -->
