@@ -14,6 +14,7 @@ export const load: PageServerLoad = async ({ locals: { supabase } }) => {
             },
         }
     );
+
     // Validate response status
     if (!response.ok) {
         throw new Error(`Failed to fetch: ${response.statusText}`);
@@ -21,6 +22,6 @@ export const load: PageServerLoad = async ({ locals: { supabase } }) => {
 
     // Parse and type-cast the response
     const result: ApiResponse<{ data: Device[], pagination: { totalCount: number } }> = await response.json();
-
+    console.log(result.data);
     return { user, devices: result.data, pagination: result.pagination };
 }

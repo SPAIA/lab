@@ -37,8 +37,8 @@
 	let devices: MediaDeviceInfo[] = [];
 	let selectedDeviceId: string | null = null;
 
-	let threshold = $state(34);
-	let minBoxSize = $state(20);
+	let threshold = $state(7);
+	let minBoxSize = $state(8);
 	let minMotionPixels = $state(50);
 	let maxTrackAge = $state(50);
 	let iouThreshold = $state(0.1);
@@ -51,7 +51,7 @@
 	let errorMessage = $state('');
 
 	let lastFrameTime = 0;
-	let frameRate = 0;
+	let frameRate = $state(0);
 	let averageFrameTime = 16.67; // Start assuming 60fps
 	let lastDrawTime = 0;
 	const drawInterval = 1000 / 30; // Target 30fps for drawing
@@ -452,7 +452,7 @@
 				{/if}
 			</div>
 		</div>
-
+		<div>frame rate{frameRate}</div>
 		<video bind:this={video} class="hidden" autoplay muted playsinline></video>
 		<canvas bind:this={canvas} {width} {height} class="rounded border shadow"></canvas>
 		<label class="text-sm">

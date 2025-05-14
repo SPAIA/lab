@@ -30,7 +30,6 @@
 	// Debug with $inspect
 	$inspect({ pagination, totalDevices });
 	const deleteDevice = (device: Device) => {
-		alert('tell me why');
 		showDeleteModal.set(true);
 		deviceToDelete = device;
 	};
@@ -43,7 +42,6 @@
 <div class="flex min-h-screen w-full">
 	<div class="w-full overflow-scroll p-20">
 		<div class="space-y-4">
-			{showDeleteModal}
 			<div class={`grid w-full gap-2 p-2 ${mainGridCols} ${xlGridCols}`}>
 				{#if devices.length}
 					{#each devices as device}

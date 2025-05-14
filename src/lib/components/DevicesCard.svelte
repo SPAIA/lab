@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { Device } from '$lib/types';
-	import { createEventDispatcher } from 'svelte';
 	import FormattedDate from './FormattedDate.svelte';
 	import { Dropdown, DropdownItem } from 'flowbite-svelte';
 
