@@ -8,7 +8,6 @@
 	import type { Feature, FeatureCollection, GeoJsonProperties, Polygon } from 'geojson';
 	import { activeHabitat } from './stores/habitatStore';
 	import { fetchWithToken } from './api';
-	import type { Habitat } from './types/habitatTypes';
 	import { goto } from '$app/navigation';
 	import { editMap } from './stores/mapStore';
 	import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
@@ -110,9 +109,6 @@
 			})
 		);
 		map.addControl(new mapboxgl.NavigationControl());
-		editMap.subscribe((mode) => {
-			mode && showDraw ? map.addControl(draw) : (draw ?? map.removeControl(draw));
-		});
 
 		map.on('draw.create', updateArea);
 		map.on('draw.delete', updateArea);

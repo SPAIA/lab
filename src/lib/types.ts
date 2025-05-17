@@ -58,6 +58,7 @@ export interface SPAIAEvent {
 	regions: Region[];
 	sensorData: SensorData[];
 	media: SPAIAMedia[];
+	sensordata?: { value: string; name: string }[]
 }
 
 export interface Device {

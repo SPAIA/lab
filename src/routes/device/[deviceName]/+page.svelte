@@ -4,17 +4,24 @@
 	import { Button } from 'flowbite-svelte';
 	import { onMount } from 'svelte';
 	import type { ApiResponse, SPAIAEvent } from '$lib/types';
+	import { addLoadTask, removeLoadTask } from '$lib/stores/loadStore';
+	import { tokenStore, userStore } from '$lib/stores/userStore';
+	import FormattedDate from '$lib/components/FormattedDate.svelte';
 
-	let events: SPAIAEvent[] = [];
-	let limit = 15;
-	let currentPage = 1;
-	let lastPage = 1;
-	let selectedIndex = 0;
+	// ✅ Svelte 5 state management
+	let events = $state<SPAIAEvent[]>([]);
+	let limit = $state(15);
+	let currentPage = $state(1);
+	let lastPage = $state(1);
+	let selectedIndex = $state(0);
 
-	$: deviceName = $page.params.deviceName;
-	$: imgSrc = events.length
-		? `https://beta.api.spaia.earth/images/${events[selectedIndex].media[0]?.fileId}`
-		: '';
+	// ✅ Derived state (replaces $:)
+	const deviceName = $derived($page.params.deviceName);
+	const imgSrc = $derived(
+		events.length
+			? `https://beta.api.spaia.earth/images/${events[selectedIndex].media[0]?.fileId}`
+			: ''
+	);
 
 	let imgElement: HTMLImageElement;
 	let imgNaturalWidth = 0;
@@ -35,17 +42,24 @@
 	}
 
 	async function fetchEvents(deviceName: string): Promise<SPAIAEvent[]> {
+		addLoadTask('Loading Events');
 		try {
 			const response = await fetch(
-				`https://beta.api.spaia.earth/device/${deviceName}?hasMedia=true&limit=${limit}&page=${currentPage}`
+				`https://beta.api.spaia.earth/device/${deviceName}?hasMedia=true&limit=${limit}&page=${currentPage}&ts=${new Date()}`
 			);
 			if (!response.ok) throw new Error(`Failed to fetch: ${response.statusText}`);
 			const result: ApiResponse<SPAIAEvent[]> = await response.json();
 			lastPage = result.pagination?.totalPages || 1;
+			// Reset to page 1 if current page is beyond new last page
+			if (currentPage > lastPage) {
+				currentPage = 1;
+			}
 			return result.data || [];
 		} catch (error) {
 			console.error(`Error fetching events: ${(error as Error).message}`);
 			return [];
+		} finally {
+			removeLoadTask('Loading Events');
 		}
 	}
 
@@ -74,7 +88,49 @@
 		return { scale, offsetX, offsetY };
 	}
 
-	$: transform = imgReady ? getImageTransform() : null;
+	const transform = $derived(imgReady ? getImageTransform() : null);
+
+	const deleteEvent = async (eventId: number) => {
+		addLoadTask('Deleting event.');
+		try {
+			const response = await fetch(`https://beta.api.spaia.earth/events/${eventId}`, {
+				method: 'DELETE'
+			});
+			if (!response.ok) throw new Error(`Failed to fetch: ${response.statusText}`);
+			events = events.filter((e) => e.id !== eventId);
+
+			if (selectedIndex >= events.length) {
+				selectedIndex = Math.max(0, events.length - 1);
+			}
+		} catch (error) {
+			console.error(`Error deleting events: ${(error as Error).message}`);
+			return [];
+		} finally {
+			removeLoadTask('Deleting event.');
+		}
+	};
+	const verifyEvent = async (eventId: number) => {
+		addLoadTask('Deleting event.');
+
+		const token = $derived(tokenStore);
+		try {
+			const response = await fetch(`https://beta.api.spaia.earth/event/${eventId}/verify`, {
+				method: 'PATCH',
+				headers: {
+					authorization: `Bearer ${token}`,
+					'Content-Type': 'application/json'
+				}
+			});
+			if (!response.ok) throw new Error(`Failed to verify event: ${response.statusText}`);
+			events = [...(await fetchEvents(deviceName))];
+			selectedIndex = selectedIndex;
+		} catch (error) {
+			console.error(`Error deleting events: ${(error as Error).message}`);
+			return [];
+		} finally {
+			removeLoadTask('Deleting event.');
+		}
+	};
 </script>
 
 {#if events.length}
@@ -97,12 +153,10 @@
 							style="
                 width: {(region.w ?? 1) * transform.scale}px;
                 height: {(region.h ?? 1) * transform.scale}px;
-                left: {transform.offsetX + region.x * transform.scale}px;
-                top: {transform.offsetY + region.y * transform.scale}px;
+                left: {transform.offsetX + (region.x ?? 0) * transform.scale}px;
+                top: {transform.offsetY + (region.y ?? 0) * transform.scale}px;
               "
-						>
-							{region.x}
-						</div>
+						></div>
 					{/each}
 				{/if}
 
@@ -114,10 +168,12 @@
 						<div class="w-full text-center text-gray-700">Is there a bug in this image?</div>
 						<div class="flex w-full justify-around">
 							<button
+								onclick={() => deleteEvent(events[selectedIndex].id)}
 								class="rounded-full bg-red-500 px-4 py-2 text-white transition hover:bg-red-600"
 								>No</button
 							>
 							<button
+								onclick={() => verifyEvent(events[selectedIndex].id)}
 								class="rounded-full bg-blue-500 px-4 py-2 text-white transition hover:bg-blue-600"
 								>Yes</button
 							>
@@ -126,17 +182,47 @@
 				</div>
 			</div>
 
-			<div class="h-full w-1/6 p-2">
-				regions: {events[selectedIndex].regions.length}<br />
-				time: {events[selectedIndex].time}<br />
-				ID: {events[selectedIndex].id}
+			<div class="h-full w-1/3 overflow-y-auto py-4">
+				<div class="space-y-3">
+					<div>
+						<p class="text-base font-semibold">
+							<FormattedDate date={events[selectedIndex].time as Date} />
+						</p>
+					</div>
+
+					<div>
+						<h3 class="text-sm font-medium text-gray-500">ID</h3>
+						<p class="font-mono text-base">{events[selectedIndex].id}</p>
+					</div>
+
+					<div>
+						<h3 class="text-sm font-medium text-gray-500">Temperature</h3>
+						<p class="text-base">
+							{events[selectedIndex].sensordata?.find((data) => data.name == 'Temperature')
+								?.value || 'N/A'}°C
+						</p>
+					</div>
+
+					<div>
+						<h3 class="text-sm font-medium text-gray-500">Humidity</h3>
+						<p class="text-base">
+							{events[selectedIndex].sensordata?.find((data) => data.name == 'Humidty')?.value ||
+								'N/A'}%
+						</p>
+					</div>
+
+					<div>
+						<h3 class="text-sm font-medium text-gray-500">Potential Insects</h3>
+						<p class="text-base">{events[selectedIndex].regions.length}</p>
+					</div>
+				</div>
 			</div>
 		</div>
 
 		<!-- Film Strip with Navigation -->
 		<div class="mt-4 flex h-40 w-full items-center">
 			<button
-				on:click={() => scrollFilmStrip(-1)}
+				onclick={() => scrollFilmStrip(-1)}
 				class="h-32 w-12 shrink-0 rounded bg-gray-100 hover:bg-gray-200"
 			>
 				&lt;
@@ -148,14 +234,14 @@
 					bind:this={filmStripRef}
 					style="scroll-behavior: smooth;"
 				>
-					{#each events as event, index}
+					{#each events as event, index (event.id)}
 						<button
-							on:click={() => (selectedIndex = index)}
+							onclick={() => (selectedIndex = index)}
 							class="shrink-0 transition-all"
 							class:selected={selectedIndex === index}
 						>
 							<div class="h-32 w-32 overflow-hidden rounded-lg">
-								<ImageWithLoading
+								<img
 									src={`https://beta.api.spaia.earth/images/${event.media[0]?.fileId}`}
 									alt="Event thumbnail"
 									class="h-full w-full object-cover transition-opacity"
@@ -168,12 +254,12 @@
 
 			<div class="flex flex-col space-y-1">
 				<button
-					on:click={() => scrollFilmStrip(1)}
+					onclick={() => scrollFilmStrip(1)}
 					class="h-24 w-12 shrink-0 rounded bg-gray-100 hover:bg-gray-200"
 				>
 					&gt;
 				</button>
-				<button on:click={nextPage} class="h-8 w-12 shrink-0 rounded bg-gray-100 hover:bg-gray-200">
+				<button onclick={nextPage} class="h-8 w-12 shrink-0 rounded bg-gray-100 hover:bg-gray-200">
 					&gt;&gt;
 				</button>
 			</div>

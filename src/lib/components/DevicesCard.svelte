@@ -3,14 +3,12 @@
 	import FormattedDate from './FormattedDate.svelte';
 	import { Dropdown, DropdownItem } from 'flowbite-svelte';
 
-	interface DeviceCardProps {
+	const { device, activeDeviceId, closeAllMenus, deleteDevice } = $props<{
 		device: Device;
 		activeDeviceId: number;
 		closeAllMenus: () => void;
 		deleteDevice?: (device: Device) => void;
-	}
-
-	const { device, activeDeviceId, closeAllMenus, deleteDevice } = $props() as DeviceCardProps;
+	}>();
 
 	// State to control dropdown visibility
 	let dropdownOpen = $derived(activeDeviceId === device.id);

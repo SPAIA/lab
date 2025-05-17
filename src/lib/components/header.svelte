@@ -6,7 +6,7 @@
 	export let logout = () => {};
 </script>
 
-<header class="w-full">
+<header class="z-50 w-full">
 	<Navbar>
 		<NavBrand href="/">
 			<img
@@ -25,7 +25,7 @@
 		</div>
 		<NavUl class="order-1">
 			<NavLi href="/my/lab" activeClass="font-bold">Home</NavLi>
-			<NavLi href="/bugzoo">Bug Zoo</NavLi>
+			<NavLi href="/bugzoo">Bug Zlaoo</NavLi>
 			<NavLi href="/emulator">Emulator</NavLi>
 			<!-- <NavLi href="/docs/components/navbar">Navbar</NavLi>
 			<NavLi href="/pricing">Pricing</NavLi>

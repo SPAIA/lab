@@ -8,7 +8,7 @@
 	import LoadingScreen from '$lib/components/LoadingScreen.svelte';
 	import ErrorNotification from '$lib/components/ErrorNotification.svelte';
 	import { clearError } from '$lib/stores/errorStore';
-	import { setUser, userStore } from '$lib/stores/userStore';
+	import { setUser, tokenStore, userStore } from '$lib/stores/userStore';
 	import InfoNotification from '$lib/components/InfoNotification.svelte';
 	let { children, data } = $props<{ data: LayoutData }>();
 	let { session, supabase } = $derived(data);
@@ -17,6 +17,7 @@
 		clearError();
 		const { data } = supabase.auth.onAuthStateChange((_: any, newSession: Session) => {
 			console.log('New session:', newSession);
+			tokenStore.set(newSession.access_token);
 			setUser(newSession.user);
 			if (newSession?.expires_at !== session?.expires_at) {
 				invalidate('supabase:auth');

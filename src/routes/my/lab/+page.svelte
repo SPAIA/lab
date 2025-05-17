@@ -47,7 +47,7 @@
 					{#each devices as device}
 						<DevicesCard
 							{device}
-							{deleteDevice}
+							deleteDevice={(device: Device) => deleteDevice(device)}
 							activeDeviceId={$activeDeviceCard}
 							closeAllMenus={() => {
 								activeDeviceCard.set(device.id);
