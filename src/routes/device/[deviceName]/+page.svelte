@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import ImageWithLoading from '$lib/components/ImageWithLoading.svelte';
-	import { Button } from 'flowbite-svelte';
 	import { onMount } from 'svelte';
 	import type { ApiResponse, SPAIAEvent } from '$lib/types';
 	import { addLoadTask, removeLoadTask } from '$lib/stores/loadStore';
 	import { tokenStore, userStore } from '$lib/stores/userStore';
 	import FormattedDate from '$lib/components/FormattedDate.svelte';
+	import { EyeOutline, EyeSlashOutline } from 'flowbite-svelte-icons';
 
 	// ✅ Svelte 5 state management
 	let events = $state<SPAIAEvent[]>([]);
@@ -14,6 +14,7 @@
 	let currentPage = $state(1);
 	let lastPage = $state(1);
 	let selectedIndex = $state(0);
+	let showAOI = $state(true);
 
 	// ✅ Derived state (replaces $:)
 	const deviceName = $derived($page.params.deviceName);
@@ -29,10 +30,13 @@
 	let filmStripRef: HTMLDivElement | null = null;
 	let imgReady = false;
 
+	let transform = $state<{ scale: number; offsetX: number; offsetY: number } | null>(null);
+
 	function handleImageLoad(e: CustomEvent<{ naturalWidth: number; naturalHeight: number }>) {
 		imgNaturalWidth = e.detail.naturalWidth;
 		imgNaturalHeight = e.detail.naturalHeight;
 		imgReady = true;
+		updateTransform();
 	}
 
 	function scrollFilmStrip(direction: number) {
@@ -77,18 +81,30 @@
 		}
 	});
 
-	function getImageTransform() {
-		console.log('k', imgElement);
-		if (!imgElement || imgNaturalWidth === 0) return null;
+	function updateTransform() {
+		if (!imgReady || !imgElement) {
+			transform = null;
+			return;
+		}
+		console.log('here 2');
 		const renderedWidth = imgElement.clientWidth;
 		const renderedHeight = imgElement.clientHeight;
 		const scale = Math.min(renderedWidth / 320, renderedHeight / 240);
 		const offsetX = (renderedWidth - 320 * scale) / 2;
 		const offsetY = (renderedHeight - 240 * scale) / 2;
-		return { scale, offsetX, offsetY };
+		transform = { scale, offsetX, offsetY };
 	}
+	$effect(() => {
+		if (!imgElement) return;
 
-	const transform = $derived(imgReady ? getImageTransform() : null);
+		const resizeObserver = new ResizeObserver(() => {
+			updateTransform();
+		});
+
+		resizeObserver.observe(imgElement);
+
+		return () => resizeObserver.disconnect();
+	});
 
 	const deleteEvent = async (eventId: number) => {
 		addLoadTask('Deleting event.');
@@ -123,7 +139,6 @@
 			});
 			if (!response.ok) throw new Error(`Failed to verify event: ${response.statusText}`);
 			events = [...(await fetchEvents(deviceName))];
-			selectedIndex = selectedIndex;
 		} catch (error) {
 			console.error(`Error deleting events: ${(error as Error).message}`);
 			return [];
@@ -137,7 +152,7 @@
 	<div class="flex h-full w-full flex-col p-4">
 		<!-- Main Image Viewer -->
 		<div class="flex h-full flex-grow-0 overflow-hidden bg-gray-100">
-			<div class="relative flex max-h-full flex-col overflow-hidden">
+			<div class="relative m-10 flex max-h-full flex-col overflow-hidden">
 				<ImageWithLoading
 					bind:imgElement
 					src={imgSrc}
@@ -145,17 +160,16 @@
 					class="h-auto max-h-[calc(100%-2.5rem)] flex-grow object-contain"
 					on:load={handleImageLoad}
 				/>
-
-				{#if transform}
+				{#if transform && showAOI}
 					{#each events[selectedIndex].regions as region}
 						<div
 							class="pointer-events-none absolute border-2 border-pink-600 bg-pink-600/20"
 							style="
-                width: {(region.w ?? 1) * transform.scale}px;
-                height: {(region.h ?? 1) * transform.scale}px;
-                left: {transform.offsetX + (region.x ?? 0) * transform.scale}px;
-                top: {transform.offsetY + (region.y ?? 0) * transform.scale}px;
-              "
+								width: {(region.w ?? 1) * transform.scale}px;
+								height: {(region.h ?? 1) * transform.scale}px;
+								left: {transform.offsetX + (region.x ?? 0) * transform.scale}px;
+								top: {transform.offsetY + (region.y ?? 0) * transform.scale}px;
+							"
 						></div>
 					{/each}
 				{/if}
@@ -186,7 +200,7 @@
 				<div class="space-y-3">
 					<div>
 						<p class="text-base font-semibold">
-							<FormattedDate date={events[selectedIndex].time as Date} />
+							<FormattedDate date={events[selectedIndex].time as Date} showTime />
 						</p>
 					</div>
 
@@ -206,14 +220,26 @@
 					<div>
 						<h3 class="text-sm font-medium text-gray-500">Humidity</h3>
 						<p class="text-base">
-							{events[selectedIndex].sensordata?.find((data) => data.name == 'Humidty')?.value ||
+							{events[selectedIndex].sensordata?.find((data) => data.name == 'Humidity')?.value ||
 								'N/A'}%
 						</p>
 					</div>
 
 					<div>
-						<h3 class="text-sm font-medium text-gray-500">Potential Insects</h3>
-						<p class="text-base">{events[selectedIndex].regions.length}</p>
+						<h3 class="text-sm font-medium text-gray-500">Areas of interest</h3>
+						<div class="flex">
+							<p class="text-base">{events[selectedIndex].regions.length}</p>
+							<button
+								onclick={() => {
+									showAOI = !showAOI;
+								}}
+							>
+								{#if showAOI}
+									<EyeSlashOutline class="ms-2 h-6 w-6 text-gray-500" />
+								{:else}<EyeOutline class="ms-2 h-6 w-6 text-gray-500" />
+								{/if}
+							</button>
+						</div>
 					</div>
 				</div>
 			</div>
