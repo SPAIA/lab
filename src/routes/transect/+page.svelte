@@ -186,7 +186,7 @@
 
 		<!-- Context Slide -->
 		<div class="h-full flex-shrink-0 px-4" style={`width: ${100 / totalSlides}%`}>
-			<div class="h-full space-y-6 rounded-3xl bg-white p-6 shadow">
+			<div class="h-full space-y-6 overflow-y-scroll rounded-3xl bg-white p-6 shadow">
 				<h2 class="text-2xl font-bold">Urban Biodiversity Field Observation</h2>
 
 				<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -240,7 +240,7 @@
 				class="h-full flex-shrink-0 overflow-y-scroll px-4"
 				style={`width: ${100 / totalSlides}%`}
 			>
-				<div class="h-full space-y-6 rounded-3xl bg-white p-6 shadow">
+				<div class="h-auto space-y-6 overflow-y-scroll rounded-3xl bg-white p-6 shadow">
 					<h3 class="text-xl font-semibold">Sighting #{i + 1}</h3>
 					<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 						<Input bind:value={sighting.group} placeholder="Insect Group (e.g. Bees, Flies)" />
@@ -279,7 +279,7 @@
 		{/each}
 		<!-- Reflection slide -->
 		<div class="h-full flex-shrink-0 px-4" style={`width: ${100 / totalSlides}%`}>
-			<div class="h-full space-y-6 rounded-3xl bg-white p-6 shadow">
+			<div class="h-full space-y-6 overflow-y-scroll rounded-3xl bg-white p-6 shadow">
 				<h3 class="text-xl font-semibold">Final Reflection</h3>
 				<p>
 					Did anything today shift your sense of connection—with this place, its inhabitants, or
