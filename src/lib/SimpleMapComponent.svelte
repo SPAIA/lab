@@ -3,6 +3,8 @@
 	import mapboxgl from 'mapbox-gl';
 	import { browser } from '$app/environment';
 	import 'mapbox-gl/dist/mapbox-gl.css';
+	import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
+	import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 
 	const { location } = $props<{
 		location: { latitude: number | null; longitude: number | null };
@@ -43,24 +45,40 @@
 
 	async function initializeMap(longitude: number, latitude: number) {
 		mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
+
 		map = new mapboxgl.Map({
 			container: mapContainer,
 			style: 'mapbox://styles/mapbox/streets-v12',
 			center: [longitude, latitude],
-			zoom: 14
+			zoom: 16
 		});
 
 		map.addControl(new mapboxgl.NavigationControl());
 
-		new mapboxgl.Marker({
-			color: '#3B82F6',
-			anchor: 'bottom'
-		})
+		// Marker
+		const marker = new mapboxgl.Marker({ color: '#3CF4A2' })
 			.setLngLat([longitude, latitude])
 			.addTo(map);
 
-		location.latitude = latitude;
-		location.longitude = longitude;
+		// Geocoder
+		const geocoder = new MapboxGeocoder({
+			accessToken: mapboxgl.accessToken,
+			mapboxgl: mapboxgl,
+			marker: false,
+			placeholder: 'Search for a location'
+		});
+
+		geocoder.addTo('#geocoder');
+		console.log('go');
+		// When a result is selected
+		geocoder.on('result', (e: any) => {
+			if (!map) return;
+			const coords = e.result.center;
+			marker.setLngLat(coords);
+			map.flyTo({ center: coords });
+			location.latitude = coords[1];
+			location.longitude = coords[0];
+		});
 	}
 
 	onMount(async () => {
@@ -98,6 +116,15 @@
 			<p class="text-sm">Showing default location</p>
 		</div>
 	{/if}
-
+	<div class="absolute left-2 top-2 mb-2">
+		<div id="geocoder" class="flex w-full gap-2"></div>
+	</div>
 	<div bind:this={mapContainer} class="h-full w-full rounded-lg border border-gray-200"></div>
+	<div class="mapboxgl-ctrl-geocoder"></div>
 </div>
+
+<style global>
+	.mapboxgl-ctrl-geocoder {
+		padding-left: 20px !important;
+	}
+</style>
