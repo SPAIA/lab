@@ -1,23 +1,35 @@
 <script lang="ts">
 	import { tokenStore } from '$lib/stores/userStore';
-	import { Button, Checkbox, Label, Radio, Input, Textarea } from 'flowbite-svelte';
+	import { Button, Checkbox, Label, Radio, Input, Textarea, Select, Modal } from 'flowbite-svelte';
 	import { onMount } from 'svelte';
 	import { get } from 'svelte/store';
+	import SimpleMapComponent from '$lib/SimpleMapComponent.svelte';
 
 	let currentSlide = $state(0);
+	let showThankYouModal = $state(false);
 
 	let form = $state({
-		date: '',
-		time: '',
-		location: '',
+		startTime: null as Date | null,
+		location: {
+			latitude: null as number | null,
+			longitude: null as number | null
+		},
 		weather: '',
 		temperature: '',
 		wind: '',
 		season: '',
-		sightings: [],
+		sightings: [] as Array<{
+			group: string;
+			count: string;
+			behavior: string;
+			where: string;
+			notes: string;
+		}>,
 		reflection: '',
 		consent: false
 	});
+
+	let surveyComplete = $state(false);
 
 	const totalSlides = $derived(3 + form.sightings.length); // Introduction + Context + Sightings + Reflection
 
@@ -39,7 +51,6 @@
 			{ group: '', count: '', behavior: '', where: '', notes: '' }
 		];
 		form = form; // Trigger reactivity
-		// We need to wait for reactivity to update totalSlides before setting currentSlide
 		setTimeout(() => {
 			currentSlide = form.sightings.length + 1; // Adjust for intro and context slides
 		}, 0);
@@ -51,12 +62,16 @@
 
 	async function submitForm() {
 		try {
+			// Validate location
+			if (form.location.latitude === null || form.location.longitude === null) {
+				throw new Error('Please provide both latitude and longitude coordinates');
+			}
+
 			// Transform form data to match API schema
 			const submissionData = {
-				user_id: '', // Will be populated from auth
+				user_id: null, // Will be populated from auth
 				type: 'transect',
-				date: form.date,
-				time: form.time,
+				time: form.startTime,
 				location: form.location,
 				weather: form.weather,
 				temperature: parseInt(form.temperature) || 0,
@@ -73,7 +88,7 @@
 				}))
 			};
 			const token = get(tokenStore);
-			const response = await fetch('https://beta.api.spaia.earth/submissions', {
+			const response = await fetch('https://beta.api.spaia.earth/field-observations', {
 				method: 'POST',
 				headers: {
 					authorization: `Bearer ${token}`,
@@ -89,13 +104,15 @@
 
 			const result = await response.json();
 			console.log('Submission successful:', result);
-			alert('Thank you for your submission!');
+			showThankYouModal = true;
 
 			// Reset form after successful submission
 			form = {
-				date: '',
-				time: '',
-				location: '',
+				startTime: null,
+				location: {
+					latitude: null,
+					longitude: null
+				},
 				weather: '',
 				temperature: '',
 				wind: '',
@@ -118,16 +135,17 @@
 	}
 
 	function startSurvey() {
-		// Set current date and time
-		const now = new Date();
-		form.date = now.toISOString().split('T')[0]; // Format as YYYY-MM-DD
-		form.time = now.toTimeString().slice(0, 5); // Format as HH:MM
+		// Set start time as Date object
+		form.startTime = new Date();
 
 		// Ask for location
 		if (navigator.geolocation) {
 			navigator.geolocation.getCurrentPosition(
 				(position) => {
-					form.location = `${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`;
+					form.location = {
+						latitude: position.coords.latitude,
+						longitude: position.coords.longitude
+					};
 					form = form; // Trigger reactivity
 				},
 				(error) => {
@@ -138,7 +156,7 @@
 		} else {
 			alert('Geolocation is not supported by your browser. Please enter your location manually.');
 		}
-		console.log('geo');
+
 		// Move to the next slide
 		goNext();
 	}
@@ -186,50 +204,81 @@
 
 		<!-- Context Slide -->
 		<div class="h-full flex-shrink-0 px-4" style={`width: ${100 / totalSlides}%`}>
-			<div class="h-full space-y-6 overflow-y-scroll rounded-3xl bg-white p-6 shadow">
+			<div class="h-full max-h-[90vh] space-y-6 overflow-y-auto rounded-3xl bg-white p-6 shadow">
 				<h2 class="text-2xl font-bold">Urban Biodiversity Field Observation</h2>
 
-				<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-					<Input bind:value={form.date} type="date" placeholder="Date" />
-					<Input bind:value={form.time} type="time" placeholder="Time" />
-					<Input bind:value={form.location} placeholder="Location (GPS coordinates)" />
+				<div class="space-y-4">
+					<p class="text-gray-500 dark:text-gray-400">
+						Survey started at: {form.startTime
+							? new Date(form.startTime).toLocaleString()
+							: 'Not started'}
+					</p>
+					<SimpleMapComponent location={form.location} />
+					<div class="grid grid-cols-2 gap-4 md:col-span-2">
+						<Input
+							bind:value={form.location.latitude}
+							type="number"
+							step="0.000001"
+							min="-90"
+							max="90"
+							placeholder="Latitude"
+						/>
+						<Input
+							bind:value={form.location.longitude}
+							type="number"
+							step="0.000001"
+							min="-180"
+							max="180"
+							placeholder="Longitude"
+						/>
+					</div>
 				</div>
 
-				<div>
-					<Label class="mb-2 block">Weather</Label>
-					<div class="flex flex-wrap gap-4">
-						{#each ['Sunny', 'Partly cloudy', 'Overcast', 'Rainy'] as condition}
-							<div class="flex items-center gap-2">
-								<Radio name="weather" value={condition} bind:group={form.weather} />
-								<span>{condition}</span>
-							</div>
-						{/each}
+				<div class="space-y-4">
+					<div>
+						<Label class="mb-1 block">Weather</Label>
+						<div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
+							{#each ['Sunny', 'Partly cloudy', 'Overcast', 'Rainy'] as condition}
+								<label class="flex items-center gap-2">
+									<Radio name="weather" value={condition} bind:group={form.weather} />
+									<span class="text-sm">{condition}</span>
+								</label>
+							{/each}
+						</div>
 					</div>
 
-					<div class="mt-4 grid grid-cols-2 gap-4">
-						<Input bind:value={form.temperature} type="number" placeholder="Temperature (°C)" />
+					<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
 						<div>
-							<Label class="mb-2 block">Wind</Label>
-							<div class="flex flex-wrap gap-4">
-								{#each ['None', 'Light breeze', 'Moderate', 'Strong'] as wind}
-									<div class="flex items-center gap-2">
+							<Label class="mb-1 block">Temperature</Label>
+							<Input bind:value={form.temperature} type="number" />
+						</div>
+
+						<div>
+							<Label class="mb-1 block">Wind</Label>
+							<div class="grid grid-cols-2 gap-2">
+								{#each ['calm', 'light', 'moderate', 'strong'] as wind}
+									<label class="flex items-center gap-2">
 										<Radio name="wind" value={wind} bind:group={form.wind} />
-										<span>{wind}</span>
-									</div>
+										<span class="text-sm">{wind}</span>
+									</label>
 								{/each}
 							</div>
 						</div>
-						<Input bind:value={form.season} placeholder="Season" />
+
+						<div class="sm:col-span-2">
+							<Label class="mb-1 block">Season</Label>
+							<Select bind:value={form.season} placeholder={'Choose a season'}>
+								<option>Spring</option>
+								<option>Summer</option>
+								<option>Autumn</option>
+								<option>Winter</option>
+							</Select>
+						</div>
 					</div>
 				</div>
 
 				<div class="flex justify-end">
-					<Button
-						on:click={() => {
-							addSightingAndAdvance();
-						}}
-						class="mt-4">Add Sighting</Button
-					>
+					<Button on:click={addSightingAndAdvance} class="mt-4">Add Sighting</Button>
 				</div>
 			</div>
 		</div>
@@ -255,7 +304,7 @@
 						/>
 					</div>
 
-					<div class="flex justify-between pt-4">
+					<div class="flex justify-center pt-4">
 						{#if i === form.sightings.length - 1}
 							<Button on:click={addSightingAndAdvance} color="light" outline>
 								Add Another Sighting
@@ -267,11 +316,8 @@
 					</div>
 
 					{#if i === form.sightings.length - 1}
-						<div class="flex justify-between">
+						<div class="flex justify-end">
 							<Button on:click={goToReflection} color="blue">Done</Button>
-							<Button on:click={addSightingAndAdvance} color="light" outline
-								>Add Another Sighting</Button
-							>
 						</div>
 					{/if}
 				</div>
@@ -295,7 +341,6 @@
 				</div>
 
 				<div class="flex justify-between pt-4">
-					<Button onclick={submitForm} color="light" outline>Submit</Button>
 					<div class="flex items-start gap-2">
 						<Checkbox bind:checked={form.consent} />
 						<Label class="ml-2">
@@ -303,14 +348,21 @@
 							citizen science.
 						</Label>
 					</div>
+					<Button onclick={submitForm} color="light" outline>Submit</Button>
 				</div>
 			</div>
 		</div>
 	</div>
 
 	<!-- Navigation -->
-	<div class="mt-2 flex items-center justify-between">
-		<Button onclick={goBack} disabled={currentSlide === 0} color="light">Previous</Button>
+	<div class="mt-2 flex justify-between">
+		{#if currentSlide > 0}
+			<Button onclick={goBack} disabled={currentSlide === 0} color="light" class="ml-4"
+				>Previous</Button
+			>
+		{:else}
+			<div></div>
+		{/if}
 		<div class="flex gap-2">
 			{#each Array(totalSlides) as _, i}
 				<button
@@ -322,6 +374,21 @@
 				></button>
 			{/each}
 		</div>
-		<Button on:click={goNext} disabled={currentSlide >= totalSlides - 1} color="light">Next</Button>
+		{#if surveyComplete}
+			<Button on:click={goNext} disabled={currentSlide >= totalSlides - 1} color="light"
+				>Next</Button
+			>
+		{:else}
+			<div class="w-10"></div>
+		{/if}
 	</div>
+	<Modal bind:open={showThankYouModal} title="Thank You!" class="max-w-md">
+		<p class="text-gray-600 dark:text-gray-400">
+			Your observations have been successfully submitted. Your contribution helps us better
+			understand urban biodiversity.
+		</p>
+		<div slot="footer" class="flex justify-end">
+			<Button on:click={() => (showThankYouModal = false)}>Close</Button>
+		</div>
+	</Modal>
 </div>

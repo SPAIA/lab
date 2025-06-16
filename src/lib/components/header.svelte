@@ -27,6 +27,7 @@
 			<NavLi href="/my/lab" activeClass="font-bold">Home</NavLi>
 			<NavLi href="/bugzoo">Bug Zoo</NavLi>
 			<NavLi href="/emulator">Emulator</NavLi>
+			<NavLi href="/observation">Field Observations</NavLi>
 			<!-- <NavLi href="/docs/components/navbar">Navbar</NavLi>
 			<NavLi href="/pricing">Pricing</NavLi>
 			<NavLi href="/contact">Contact</NavLi> -->

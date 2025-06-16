@@ -12,14 +12,11 @@
 		clearError();
 	});
 	function handleSubmit() {
-		addLoadTask('Logging in...');
 		return async ({ result }: any) => {
-			removeLoadTask('logging in...');
-
 			console.log('result', result);
 			if (result?.data?.error) {
 				setError(result.data.error);
-			} else if (result.success) {
+			} else if (result?.data?.success) {
 				goto('/my/lab');
 			} else if (result.type == 'redirect') {
 				if (result.location) {

@@ -94,3 +94,40 @@ export interface DeviceSettings {
 	deviceName?: string;
 	serial?: string;
 }
+
+export interface Sighting {
+	group: string;
+	count: string;
+	behavior: string;
+	where: string;
+	notes: string;
+	time: Date
+}
+interface GeoCoordinates {
+	lat: number;
+	lng: number;
+}
+
+interface DateTimeFields {
+	date: Date;
+	time: string;
+	created_at: Date;
+}
+
+
+type ObservationType = "transect" | "point" | "area" | "fit"; // Add other possible types
+type Season = "Spring" | "Summer" | "Autumn" | "Winter";
+
+export interface FieldObservation {
+	id: string;
+	user_id: string;
+	type: ObservationType;
+	location: GeoCoordinates | string; // Can handle both formats
+	weather: string;
+	temperature: number;
+	wind: string;
+	season: Season;
+	consent: boolean;
+	date: string; // ISO date string (could also use Date type if you parse it)
+	time: string; // HH:MM:SS format
+}

@@ -36,7 +36,9 @@
 
 	async function fetchEvents(): Promise<SPAIAEvent[]> {
 		try {
-			const response = await fetch(`https://beta.api.spaia.earth/events/user/kiez-wald`);
+			const response = await fetch(
+				`https://beta.api.spaia.earth/events/user/kiez-wald?hasMedia=true`
+			);
 			if (!response.ok) throw new Error(`Failed to fetch: ${response.statusText}`);
 			const result: ApiResponse<SPAIAEvent[]> = await response.json();
 			lastPage = result.pagination?.totalPages || 1;
@@ -60,10 +62,6 @@
 			.setLngLat([location.coordinates[0], location.coordinates[1]])
 			.addTo(map);
 
-		marker.on('dragend', () => {
-			const lngLat = marker.getLngLat();
-			console.log('Updated coordinates:', lngLat);
-		});
 		fetchEvents().then((ev) => {
 			events = ev;
 		});
@@ -111,15 +109,17 @@
 	>
 		<div class="flex h-full items-center space-x-4 px-4">
 			{#each events as event, i}
-				<div
-					class="group h-20 w-20 flex-shrink-0 cursor-pointer overflow-hidden rounded shadow-sm transition-all hover:shadow-md"
-				>
-					<img
-						src={`https://beta.api.spaia.earth/images/${event.media[0]?.fileId}`}
-						alt={`Gallery image ${i + 1}`}
-						class="h-full w-full object-cover transition-transform group-hover:scale-105"
-					/>
-				</div>
+				{#if event.media[0]?.fileId}
+					<div
+						class="group h-20 w-20 flex-shrink-0 cursor-pointer overflow-hidden rounded shadow-sm transition-all hover:shadow-md"
+					>
+						<img
+							src={`https://beta.api.spaia.earth/images/${event.media[0]?.fileId}`}
+							alt={`Gallery image ${i + 1}`}
+							class="h-full w-full object-cover transition-transform group-hover:scale-105"
+						/>
+					</div>
+				{/if}
 			{/each}
 		</div>
 	</div>
